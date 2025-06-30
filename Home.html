@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰💲เว็บบันทึกรายจ่าย💸💵</title>
+    <style>
+        body{
+            background-color: #a2d2ff;
+        }
+        h1{
+            text-align: center;            
+            font-size: 2cm;
+            color: #ffafcc;
+        }
+        header{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+            height: 100px;
+            text-align: center;
+            border-radius: 20px;
+            background-color: #cdb4db;
+        }
+        .text{
+            max-width: 300px;
+            height: 40px;
+            font-size: 16px;
+        }
+        button{
+            flex: 1 1 200px;
+            max-width: 300px;
+            height: 40px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            color: #ffafcc;
+            background-color: #bde0fe;
+        }
+        .delete-btn{
+            font-size: 25px;
+        }
+        .add{
+            margin-top: 28px;
+        }
+        input{
+            margin-top: 30px;
+            flex: 1 1 200px;
+            max-width: 300px;
+            height: 30px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            background-color: #bde0fe;
+        }
+        footer{
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+            height: 700px;
+            border-radius: 30px;
+            background-color: #ffc8dd;
+        }
+        h2{
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            width: 250px;
+            height: 40px;
+            border-radius: 20px;
+            text-align: center;
+            text-overflow: clip;
+            color: #a2d2ff;
+            background-color: #cdb4db;
+        }
+        ul{
+            list-style: none;
+            padding: 0;
+        }
+        li{
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            background-color: #ffafcc;
+        }
+        div{
+            width: 300px;
+            height: 30px;
+            margin-left: 20px;
+            padding-right: 15px;
+            font-size: 20px;
+            border-radius: 10px;
+            text-align: left;
+            color: #ffc8dd;
+            background-color: #cdb4db;
+        }
+        .total{
+            width: 300px;
+        }
+        @media screen and (max-width:500px) {
+            h1{
+                font-size: 35px;
+            }
+            header{
+                width: 100%;
+                height: 160px;
+                padding: 10px;
+            }
+            footer{
+                width: 100%;
+                height: 800px;
+                padding: 10px;
+            }
+            input,button{
+                font-size: 14px;
+                width: 100%;
+            }       
+            .delete-btn{
+                width: 200px;
+                max-height: 30px;
+                font-size: 15px;
+            }    
+            li{
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            li button{
+                align-self: flex-end;
+                margin-top: 5px;
+            }
+            #total{
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>    
+    <h1>💰💲เว็บบันทึกรายจ่าย💸💵</h1>
+    <header>
+        <input class="text" type="text" id="exps" placeholder="รายละเอียดรายจ่าย">
+        <input class="text" type="number" id="salary" placeholder="จำนวณเงิน (บาท)">
+        <button class="add" onclick="addsal()">เพิ่มรายจ่าย</button>             
+    </header>
+    <footer>
+        <h2>💸รายการทั้งหมด💸</h2>
+
+        <ul id="exp-list"></ul>
+
+        <div id="total">ยอดรวม : 0.00 บาท</div>
+    </footer>
+    <script>
+        let exp = [];
+
+        function addsal(){
+            const exps = document.getElementById('exps').value.trim();
+            const salary = parseFloat(document.getElementById('salary').value);
+
+            if(exps === ''|| isNaN(salary)||salary<=0){
+                alert('กรุณากรอกข้อมูลให้ถูกต้อง');
+                return;
+            }
+
+            const expe  ={exps,salary};
+            exp.push(expe);
+            renderExp();
+            savedata(); //บันทึกลง savedata
+
+            document.getElementById('exps').value='';
+            document.getElementById('salary').value='';
+        }
+        function deleteExp(index){
+            exp.splice(index,1);
+            renderExp();
+            savedata();// อัปเดต savedata
+        }
+        function renderExp(){
+            const list = document.getElementById('exp-list');
+            list.innerHTML = '';
+            let total =0;
+            exp.forEach((eexp,i)=>{
+                total += eexp.salary;
+                const li = document.createElement('li');
+                li.innerHTML =`
+                <span>📌${eexp.exps} - ${eexp.salary.toFixed(2)} บาท 💸</span>
+                <button class="delete-btn" onclick="deleteExp(${i})">🚮ลบ🚮</button>
+                `;
+                list.appendChild(li);
+            });
+            document.getElementById('total').innerText=`💲💲 ยอดรวม : ${total.toFixed(2)} บาท 💲💲`;
+        }
+        function savedata(){
+            localStorage.setItem("exp",JSON.stringify(exp));
+        }
+        function loaddata(){
+            const saved = localStorage.getItem("exp");
+            if(saved){
+                exp = JSON.parse(saved);
+                renderExp();
+            }
+        }
+        loaddata();//โหลดข้อมูลทันทีเมื่อเปิดเว็บ
+    </script>
+</body>
+</html>
