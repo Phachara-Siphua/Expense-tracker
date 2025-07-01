@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +22,7 @@
             margin-left: auto;
             margin-right: auto;
             max-width: 100%;
-            height: 100px;
+            height: 200px;
             text-align: center;
             border-radius: 20px;
             background-color: #cdb4db;
@@ -30,6 +31,26 @@
             max-width: 300px;
             height: 40px;
             font-size: 16px;
+        }
+        .btn-2{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            height: 20px;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .input-2{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            height: 20px;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
         }
         button{
             flex: 1 1 200px;
@@ -43,7 +64,7 @@
         .delete-btn{
             font-size: 25px;
         }
-        .add{
+        .btn{
             margin-top: 28px;
         }
         input{
@@ -108,7 +129,7 @@
             }
             header{
                 width: 100%;
-                height: 250px;
+                height: 300px;
                 padding: 10px;
             }
             footer{
@@ -142,57 +163,85 @@
 <body>    
     <h1>💰💲เว็บบันทึกรายจ่าย💸💵</h1>
     <header>
-        <input class="text" type="text" id="exps" placeholder="รายละเอียดรายจ่าย">
-        <input class="text" type="number" id="salary" placeholder="จำนวณเงิน (บาท)">
-        <button class="add" onclick="addsal()">เพิ่มรายจ่าย</button>             
+        <div class="input-2">
+            <input class="text" type="text" id="exps" placeholder="รายละเอียดรายจ่าย">
+            <input class="text" type="number" id="salary" placeholder="จำนวณเงิน (บาท)">
+            <input type="date" id="exp-date" class="text" max="">
+        </div>
+       
+        <div class="btn-2">                 
+            <button class="btn" onclick="filterToday()">วันนี้</button>
+            <button class="btn" onclick="showall()">ทั้งหมด</button>   
+            <button class="btn" onclick="addsal()">✅เพิ่มรายจ่าย✅</button> 
+        </div>            
     </header>
     <footer>
         <h2>💸รายการทั้งหมด💸</h2>
 
         <ul id="exp-list"></ul>
 
-        <div id="total">ยอดรวม : 0.00 บาท</div>
+        <div id="total">💲💲 ยอดรวม : 0.00 บาท 💲💲</div>
     </footer>
     <script>
         let exp = [];
 
+        window.onload = function(){
+            const today = new Date();
+            const maxDate = today.toISOString().split("T")[0];
+            document.getElementById("exp-date").setAttribute("max",maxDate);
+            loaddata();
+        };
+
         function addsal(){
             const exps = document.getElementById('exps').value.trim();
             const salary = parseFloat(document.getElementById('salary').value);
+            const dateInput = document.getElementById('exp-date').value;
 
-            if(exps === ''|| isNaN(salary)||salary<=0){
+            if(!exps || isNaN(salary)||salary<=0){
                 alert('กรุณากรอกข้อมูลให้ถูกต้อง');
                 return;
             }
 
-            const expe  ={exps,salary};
-            exp.push(expe);
+            let date;
+            if(dateInput){
+                date=new Date(dateInput);
+            } else{
+                date = new Date();
+            }
+
+            const expitem  ={exps,salary,timestamp: date.toISOString()};
+            exp.push(expitem);
             renderExp();
             savedata(); //บันทึกลง savedata
 
             document.getElementById('exps').value='';
             document.getElementById('salary').value='';
+            document.getElementById('exp-date').value='';
         }
         function deleteExp(index){
             exp.splice(index,1);
             renderExp();
             savedata();// อัปเดต savedata
         }
-        function renderExp(){
+        function renderExp(filtered = exp){
             const list = document.getElementById('exp-list');
             list.innerHTML = '';
             let total =0;
-            exp.forEach((eexp,i)=>{
-                total += eexp.salary;
+
+            filtered.forEach((e,i)=>{
+                const date = new Date(e.timestamp);
+                const formattedDate = date.toLocaleDateString('th-TH')+' '+date.toLocaleTimeString('en-EN');
+
+                total += e.salary;
                 const li = document.createElement('li');
                 li.innerHTML =`
-                <span>📌${eexp.exps} - ${eexp.salary.toFixed(2)} บาท 💸</span>
-                <button class="delete-btn" onclick="deleteExp(${i})">🚮ลบ🚮</button>
+                <span>📌${e.exps} - ${e.salary.toFixed(2)} บาท 💸 <br><small>📅 ${formattedDate} 🕓</small></span>
+                <button class="delete-btn" onclick="deleteExp(${i})">❌ลบ❌</button>
                 `;
                 list.appendChild(li);
             });
             document.getElementById('total').innerText=`💲💲 ยอดรวม : ${total.toFixed(2)} บาท 💲💲`;
-        }
+        }        
         function savedata(){
             localStorage.setItem("exp",JSON.stringify(exp));
         }
@@ -203,7 +252,18 @@
                 renderExp();
             }
         }
-        loaddata();//โหลดข้อมูลทันทีเมื่อเปิดเว็บ
+        function filterToday(){
+            const today = new Date();
+            const filtered = exp.filter(e=>{
+                const d = new Date(e.timestamp);
+                return d.toDateString() === today.toDateString();
+            });
+            renderExp(filtered);
+        }
+        function showall(){
+            renderExp(exp);
+        }
+        //loaddata();//โหลดข้อมูลทันทีเมื่อเปิดเว็บ
     </script>
 </body>
 </html>
